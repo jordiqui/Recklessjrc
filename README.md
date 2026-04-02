@@ -47,12 +47,13 @@ Reckless is an open source competitive chess engine, consistently performing amo
 
 You can download precompiled builds from the [GitHub Releases page](https://github.com/codedeliveryservice/Reckless/releases).
 
-- `-avx512`: Fastest, requires a recent CPU with AVX-512 support
-- `-avx2`: Fast, supported on most modern CPUs
-- `-generic`: Compatible with virtually all CPUs, but significantly slower than AVX2 or AVX512 builds
+- `-avx512`: Fastest, for recent CPUs with AVX-512
+- `-avx2`: Fast, for most modern CPUs
+- `-sse41-popcnt`: Compatible with CPUs without AVX2 but with SSE4.1 + POPCNT
+- `-generic`: Maximum compatibility, slower than the optimized variants
 
 > [!NOTE]
-> If you're unsure which binary to use, try the AVX-512 build first. If it doesn't run on your system, fall back to the AVX2 build, or the generic one as a last resort.
+> If you're unsure which binary to use, try AVX-512 first, then AVX2, then SSE4.1/POPCNT, and finally generic.
 
 ### Building from source
 
@@ -67,6 +68,24 @@ Once installed, you can build it with:
 cargo rustc --release -- -C target-cpu=native
 # ./target/release/reckless
 ```
+
+
+For explicit reproducible distributed builds, you can use:
+
+```bash
+# Linux/Windows SSE4.1 + POPCNT
+cargo rustc --release -- -C target-feature=+sse4.1,+popcnt
+
+# AVX2
+cargo rustc --release -- -C target-cpu=x86-64-v3
+
+# Generic
+cargo rustc --release -- -C target-cpu=x86-64
+```
+
+> [!NOTE]
+> `target-cpu=native` remains useful for local builds tuned to your own machine.
+> Distributed variants use explicit flags for reproducibility across systems.
 
 To build without Syzygy tablebase support and Clang dependency, add the `--no-default-features` flag:
 
